@@ -1,0 +1,10 @@
+This is a sample file for testing encryption.
+
+You can encrypt any type of file:
+- Text files (.txt)
+- Images (.jpg, .png)
+- Documents (.pdf, .docx)
+- Videos (.mp4)
+- And more!
+
+Keep your encryption key safe!
