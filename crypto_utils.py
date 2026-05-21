@@ -4,7 +4,10 @@ Provides functions for generating keys and encrypting/decrypting files.
 """
 
 from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import os
+import base64
 
 
 def generate_key():
@@ -108,6 +111,114 @@ def decrypt_file(filename, key):
         file.write(decrypted_data)
     
     print(f"✓ File decrypted: {decrypted_filename}")
+    return decrypted_filename
+
+
+def derive_key_from_password(password, salt=None):
+    """
+    Derive an encryption key from a password using PBKDF2.
+    
+    Args:
+        password (str): The password to derive the key from
+        salt (bytes, optional): Salt for key derivation. If None, generates new salt.
+        
+    Returns:
+        tuple: (key, salt) - The derived key and the salt used
+    """
+    # Generate a new salt if not provided
+    if salt is None:
+        salt = os.urandom(16)  # 16 bytes = 128 bits
+    
+    # Convert password to bytes
+    password_bytes = password.encode('utf-8')
+    
+    # Create a key derivation function
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,  # 32 bytes = 256 bits
+        salt=salt,
+        iterations=480000,  # OWASP recommendation (2023)
+    )
+    
+    # Derive the key
+    key = base64.urlsafe_b64encode(kdf.derive(password_bytes))
+    
+    return key, salt
+
+
+def encrypt_file_with_password(filename, password):
+    """
+    Encrypt a file using a password.
+    
+    Args:
+        filename (str): Path to the file to encrypt
+        password (str): Password to use for encryption
+        
+    Returns:
+        str: Path to the encrypted file (original_name.enc)
+    """
+    # Derive key from password
+    key, salt = derive_key_from_password(password)
+    
+    # Create Fernet cipher
+    fernet = Fernet(key)
+    
+    # Read the original file
+    with open(filename, "rb") as file:
+        file_data = file.read()
+    
+    # Encrypt the data
+    encrypted_data = fernet.encrypt(file_data)
+    
+    # Write salt + encrypted data to file
+    # Format: [16 bytes salt][encrypted data]
+    encrypted_filename = filename + ".enc"
+    with open(encrypted_filename, "wb") as file:
+        file.write(salt)  # Write salt first
+        file.write(encrypted_data)  # Then encrypted data
+    
+    print(f"✓ File encrypted with password: {encrypted_filename}")
+    return encrypted_filename
+
+
+def decrypt_file_with_password(filename, password):
+    """
+    Decrypt a file using a password.
+    
+    Args:
+        filename (str): Path to the encrypted file (.enc)
+        password (str): Password used for encryption
+        
+    Returns:
+        str: Path to the decrypted file (removes .enc extension)
+    """
+    # Read the encrypted file
+    with open(filename, "rb") as file:
+        # Read salt (first 16 bytes)
+        salt = file.read(16)
+        # Read encrypted data (rest of file)
+        encrypted_data = file.read()
+    
+    # Derive key from password using the stored salt
+    key, _ = derive_key_from_password(password, salt)
+    
+    # Create Fernet cipher
+    fernet = Fernet(key)
+    
+    # Decrypt the data
+    try:
+        decrypted_data = fernet.decrypt(encrypted_data)
+    except Exception as e:
+        print(f"✗ Decryption failed: {e}")
+        print("  Wrong password or corrupted file!")
+        return None
+    
+    # Write the decrypted data back
+    decrypted_filename = filename.replace(".enc", "")
+    with open(decrypted_filename, "wb") as file:
+        file.write(decrypted_data)
+    
+    print(f"✓ File decrypted with password: {decrypted_filename}")
     return decrypted_filename
 
 

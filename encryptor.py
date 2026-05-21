@@ -7,7 +7,11 @@ Command-line interface for encrypting and decrypting files.
 import argparse
 import sys
 import os
-from crypto_utils import generate_key, save_key, load_key, encrypt_file, decrypt_file
+import getpass
+from crypto_utils import (
+    generate_key, save_key, load_key, encrypt_file, decrypt_file,
+    encrypt_file_with_password, decrypt_file_with_password
+)
 
 
 def main():
@@ -48,6 +52,11 @@ Examples:
         default="secret.key",
         help="Key file to use (default: secret.key)"
     )
+    encrypt_parser.add_argument(
+        "--password", "-p",
+        action="store_true",
+        help="Use password-based encryption instead of key file"
+    )
     
     # Decrypt command
     decrypt_parser = subparsers.add_parser("decrypt", help="Decrypt a file")
@@ -56,6 +65,11 @@ Examples:
         "--key", "-k",
         default="secret.key",
         help="Key file to use (default: secret.key)"
+    )
+    decrypt_parser.add_argument(
+        "--password", "-p",
+        action="store_true",
+        help="Use password-based decryption instead of key file"
     )
     
     args = parser.parse_args()
@@ -74,18 +88,38 @@ Examples:
             print(f"✗ Error: File '{args.file}' not found")
             sys.exit(1)
         
-        # Check if key exists
-        if not os.path.exists(args.key):
-            print(f"✗ Error: Key file '{args.key}' not found")
-            print(f"   Generate a key first: python encryptor.py generate-key")
-            sys.exit(1)
+        # Password-based encryption
+        if args.password:
+            print(f"Encrypting {args.file} with password...")
+            password = getpass.getpass("Enter password: ")
+            password_confirm = getpass.getpass("Confirm password: ")
+            
+            if password != password_confirm:
+                print("✗ Error: Passwords don't match")
+                sys.exit(1)
+            
+            if len(password) < 8:
+                print("✗ Error: Password must be at least 8 characters")
+                sys.exit(1)
+            
+            encrypt_file_with_password(args.file, password)
+            print(f"\n✓ Success! Original file is still intact.")
+            print(f"⚠️  Remember your password - you'll need it to decrypt!")
         
-        # Load key and encrypt
-        print(f"Loading key from {args.key}...")
-        key = load_key(args.key)
-        print(f"Encrypting {args.file}...")
-        encrypt_file(args.file, key)
-        print(f"\n✓ Success! Original file is still intact.")
+        # Key-based encryption
+        else:
+            # Check if key exists
+            if not os.path.exists(args.key):
+                print(f"✗ Error: Key file '{args.key}' not found")
+                print(f"   Generate a key first: python encryptor.py generate-key")
+                sys.exit(1)
+            
+            # Load key and encrypt
+            print(f"Loading key from {args.key}...")
+            key = load_key(args.key)
+            print(f"Encrypting {args.file}...")
+            encrypt_file(args.file, key)
+            print(f"\n✓ Success! Original file is still intact.")
         
     elif args.command == "decrypt":
         # Check if file exists
@@ -93,22 +127,37 @@ Examples:
             print(f"✗ Error: File '{args.file}' not found")
             sys.exit(1)
         
-        # Check if key exists
-        if not os.path.exists(args.key):
-            print(f"✗ Error: Key file '{args.key}' not found")
-            sys.exit(1)
+        # Password-based decryption
+        if args.password:
+            print(f"Decrypting {args.file} with password...")
+            password = getpass.getpass("Enter password: ")
+            
+            result = decrypt_file_with_password(args.file, password)
+            
+            if result:
+                print(f"\n✓ Success! File decrypted.")
+            else:
+                print(f"\n✗ Decryption failed. Wrong password?")
+                sys.exit(1)
         
-        # Load key and decrypt
-        print(f"Loading key from {args.key}...")
-        key = load_key(args.key)
-        print(f"Decrypting {args.file}...")
-        result = decrypt_file(args.file, key)
-        
-        if result:
-            print(f"\n✓ Success! File decrypted.")
+        # Key-based decryption
         else:
-            print(f"\n✗ Decryption failed. Wrong key?")
-            sys.exit(1)
+            # Check if key exists
+            if not os.path.exists(args.key):
+                print(f"✗ Error: Key file '{args.key}' not found")
+                sys.exit(1)
+            
+            # Load key and decrypt
+            print(f"Loading key from {args.key}...")
+            key = load_key(args.key)
+            print(f"Decrypting {args.file}...")
+            result = decrypt_file(args.file, key)
+            
+            if result:
+                print(f"\n✓ Success! File decrypted.")
+            else:
+                print(f"\n✗ Decryption failed. Wrong key?")
+                sys.exit(1)
     
     else:
         parser.print_help()
