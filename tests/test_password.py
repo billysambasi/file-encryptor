@@ -3,7 +3,13 @@ Test script for password-based encryption
 Demonstrates how password encryption works
 """
 
-from crypto_utils import encrypt_file_with_password, decrypt_file_with_password
+import sys
+import os
+
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from src.crypto_utils import encrypt_file_with_password, decrypt_file_with_password
 
 print("=" * 60)
 print("TESTING PASSWORD-BASED ENCRYPTION")

@@ -8,7 +8,12 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import os
 import base64
-from logger import setup_logger, log_encryption, log_decryption, log_key_generation, log_error
+import sys
+
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from src.logger import setup_logger, log_encryption, log_decryption, log_key_generation, log_error
 
 # Initialize logger
 logger = setup_logger()

@@ -5,7 +5,12 @@ Supports glob patterns and directory processing
 
 import os
 import glob
-from crypto_utils import (
+import sys
+
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from src.crypto_utils import (
     encrypt_file, decrypt_file,
     encrypt_file_with_password, decrypt_file_with_password,
     load_key
@@ -225,7 +230,7 @@ if __name__ == "__main__":
     
     # Generate a key
     print("\n2. Generating test key...")
-    from crypto_utils import generate_key, save_key
+    from src.crypto_utils import generate_key, save_key
     key = generate_key()
     save_key(key, "batch_test.key")
     

@@ -8,12 +8,17 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, scrolledtext
 import threading
 import os
-from crypto_utils import (
+import sys
+
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from src.crypto_utils import (
     generate_key, save_key, load_key,
     encrypt_file, decrypt_file,
     encrypt_file_with_password, decrypt_file_with_password
 )
-from batch_operations import (
+from src.batch_operations import (
     batch_encrypt_with_key, batch_decrypt_with_key,
     batch_encrypt_with_password, batch_decrypt_with_password
 )

@@ -8,12 +8,16 @@ import argparse
 import sys
 import os
 import getpass
-from crypto_utils import (
+
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from src.crypto_utils import (
     generate_key, save_key, load_key, encrypt_file, decrypt_file,
     encrypt_file_with_password, decrypt_file_with_password
 )
-from logger import get_log_summary
-from batch_operations import (
+from src.logger import get_log_summary
+from src.batch_operations import (
     batch_encrypt_with_key, batch_decrypt_with_key,
     batch_encrypt_with_password, batch_decrypt_with_password,
     print_batch_summary

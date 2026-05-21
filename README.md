@@ -47,6 +47,20 @@ A Python-based file encryption and decryption tool using symmetric encryption (A
    pip install -r requirements.txt
    ```
 
+## Quick Start
+
+### GUI Interface (Easiest)
+
+```powershell
+python run_gui.py
+```
+
+### CLI Interface
+
+```powershell
+python run_cli.py --help
+```
+
 ## Usage
 
 ### GUI Interface (Recommended for Beginners)
@@ -54,7 +68,7 @@ A Python-based file encryption and decryption tool using symmetric encryption (A
 Launch the graphical interface:
 
 ```powershell
-python gui.py
+python run_gui.py
 ```
 
 The GUI provides:
@@ -67,73 +81,66 @@ Simply click buttons, browse for files, and let the interface guide you!
 
 ### Command-Line Interface (CLI)
 
-### 1. Generate an Encryption Key
+#### Basic Commands
 
-First, generate a secret key (only do this once):
-
+**Generate a key:**
 ```powershell
-python encryptor.py generate-key
+python run_cli.py generate-key
 ```
 
-This creates a `secret.key` file. **Keep this safe!** Without it, you cannot decrypt your files.
-
-### 2. Encrypt a File
-
-Encrypt any file:
-
+**Encrypt a file:**
 ```powershell
-python encryptor.py encrypt myfile.txt
+python run_cli.py encrypt examples/sample.txt
 ```
 
-This creates `myfile.txt.enc` (encrypted version). Your original file stays intact.
-
-**Encrypt other file types:**
+**Decrypt a file:**
 ```powershell
-python encryptor.py encrypt photo.jpg
-python encryptor.py encrypt document.pdf
-python encryptor.py encrypt video.mp4
+python run_cli.py decrypt examples/sample.txt.enc
 ```
 
-### 3. Decrypt a File
-
-Decrypt an encrypted file:
-
-```powershell
-python encryptor.py decrypt myfile.txt.enc
-```
-
-This restores the original `myfile.txt`.
-
-### Advanced Options
+#### Advanced Options
 
 **Use a custom key file:**
 ```powershell
-python encryptor.py generate-key --output mykey.key
-python encryptor.py encrypt file.txt --key mykey.key
-python encryptor.py decrypt file.txt.enc --key mykey.key
+python run_cli.py generate-key --output mykey.key
+python run_cli.py encrypt file.txt --key mykey.key
+python run_cli.py decrypt file.txt.enc --key mykey.key
+```
+
+**Use password instead of key file:**
+```powershell
+python run_cli.py encrypt file.txt --password
+python run_cli.py decrypt file.txt.enc --password
+```
+
+**Encrypt other file types:**
+```powershell
+python run_cli.py encrypt photo.jpg
+python run_cli.py encrypt document.pdf
+python run_cli.py encrypt video.mp4
 ```
 
 **Get help:**
 ```powershell
-python encryptor.py --help
-python encryptor.py encrypt --help
+python run_cli.py --help
+python run_cli.py encrypt --help
 ```
 
 **Batch operations:**
 ```powershell
 # Encrypt all text files
-python encryptor.py batch-encrypt "*.txt"
+python run_cli.py batch-encrypt "*.txt"
 
 # Decrypt all encrypted files
-python encryptor.py batch-decrypt "*.enc"
+python run_cli.py batch-decrypt "*.enc"
 
 # Use password for batch operations
-python encryptor.py batch-encrypt "*.pdf" --password
+python run_cli.py batch-encrypt "*.pdf" --password
 ```
 
 **View activity logs:**
 ```powershell
-python encryptor.py logs
+python run_cli.py logs
 ```
 
 ## How It Works
@@ -145,20 +152,31 @@ python encryptor.py logs
    - Timestamp included (optional expiration)
 3. **Decryption**: Reverses the process using the same key
 
-## File Structure
+## Project Structure
 
 ```
 file-encryptor/
-├── gui.py                 # Graphical user interface
-├── encryptor.py           # CLI interface
-├── crypto_utils.py        # Core encryption functions
-├── batch_operations.py    # Batch processing functions
-├── logger.py              # Activity logging system
-├── sample.txt             # Sample file for testing
-├── requirements.txt       # Python dependencies
-├── README.md              # This file
-├── .gitignore             # Prevents committing keys/encrypted files
-└── venv/                  # Virtual environment (not in git)
+├── src/                       # Source code
+│   ├── __init__.py           # Package initialization
+│   ├── gui.py                # Graphical user interface
+│   ├── encryptor.py          # CLI interface
+│   ├── crypto_utils.py       # Core encryption functions
+│   ├── batch_operations.py   # Batch processing functions
+│   └── logger.py             # Activity logging system
+├── tests/                     # Test files
+│   ├── run_all_tests.py      # Comprehensive test suite
+│   └── test_password.py      # Password encryption tests
+├── examples/                  # Example files for testing
+│   ├── README.md             # Examples documentation
+│   ├── sample.txt            # Sample text file
+│   └── doc*.txt              # Multiple files for batch testing
+├── docs/                      # Additional documentation
+├── run_gui.py                 # GUI launcher script
+├── run_cli.py                 # CLI launcher script
+├── requirements.txt           # Python dependencies
+├── README.md                  # This file
+├── .gitignore                 # Git ignore rules
+└── venv/                      # Virtual environment (not in git)
 ```
 
 ## Security Notes
@@ -182,33 +200,44 @@ file-encryptor/
 
 ## Testing
 
-**Test the GUI:**
+**Run comprehensive test suite:**
 ```powershell
-python gui.py
+python tests/run_all_tests.py
 ```
 
-**Test the CLI encryption system:**
+This tests:
+- Key generation and management
+- File encryption/decryption
+- Password-based encryption
+- Batch operations
+- Logging system
+
+**Test individual components:**
+
+GUI:
 ```powershell
-python crypto_utils.py
+python run_gui.py
 ```
 
-**Test batch operations:**
+Core encryption:
 ```powershell
-python batch_operations.py
+python src/crypto_utils.py
 ```
 
-**Test logging system:**
+Batch operations:
 ```powershell
-python logger.py
+python src/batch_operations.py
 ```
 
-These automated tests show:
-- Key generation
-- File encryption
-- File decryption
-- Content verification
-- Batch processing
-- Activity logging
+Password encryption:
+```powershell
+python tests/test_password.py
+```
+
+Logging:
+```powershell
+python src/logger.py
+```
 
 ## Troubleshooting
 
