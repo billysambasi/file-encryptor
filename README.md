@@ -6,7 +6,10 @@ A Python-based file encryption and decryption tool using symmetric encryption (A
 
 ✅ **Universal File Support** - Encrypt any file type (text, images, PDFs, videos, etc.)  
 ✅ **Strong Encryption** - Uses Fernet (AES-128 in CBC mode with HMAC authentication)  
-✅ **Simple CLI** - Easy-to-use command-line interface  
+✅ **Dual Interface** - Both GUI and CLI available  
+✅ **Password & Key-Based** - Choose between password or key file encryption  
+✅ **Batch Operations** - Encrypt/decrypt multiple files at once with glob patterns  
+✅ **Activity Logging** - Track all encryption/decryption operations  
 ✅ **Safe by Default** - Original files remain untouched during encryption  
 ✅ **Error Handling** - Clear error messages and validation  
 
@@ -18,9 +21,12 @@ A Python-based file encryption and decryption tool using symmetric encryption (A
 - [x] Encrypt function
 - [x] Decrypt function
 - [x] CLI interface
+- [x] Password-based encryption
+- [x] Logging system
+- [x] Batch operations
+- [x] GUI interface
 - [x] Testing
 - [x] Documentation
-- [ ] Extensions (password-based, logging, GUI)
 
 ## Installation
 
@@ -38,10 +44,28 @@ A Python-based file encryption and decryption tool using symmetric encryption (A
 
 3. **Install dependencies:**
    ```powershell
-   pip install cryptography
+   pip install -r requirements.txt
    ```
 
 ## Usage
+
+### GUI Interface (Recommended for Beginners)
+
+Launch the graphical interface:
+
+```powershell
+python gui.py
+```
+
+The GUI provides:
+- **Single File Tab** - Encrypt/decrypt individual files with browse buttons
+- **Batch Operations Tab** - Process multiple files using patterns (*.txt, *.pdf)
+- **Key Management Tab** - Generate new encryption keys
+- **About Tab** - Information about the tool
+
+Simply click buttons, browse for files, and let the interface guide you!
+
+### Command-Line Interface (CLI)
 
 ### 1. Generate an Encryption Key
 
@@ -95,6 +119,23 @@ python encryptor.py --help
 python encryptor.py encrypt --help
 ```
 
+**Batch operations:**
+```powershell
+# Encrypt all text files
+python encryptor.py batch-encrypt "*.txt"
+
+# Decrypt all encrypted files
+python encryptor.py batch-decrypt "*.enc"
+
+# Use password for batch operations
+python encryptor.py batch-encrypt "*.pdf" --password
+```
+
+**View activity logs:**
+```powershell
+python encryptor.py logs
+```
+
 ## How It Works
 
 1. **Key Generation**: Creates a random 32-byte key using cryptographically secure methods
@@ -108,12 +149,16 @@ python encryptor.py encrypt --help
 
 ```
 file-encryptor/
-├── encryptor.py       # CLI interface
-├── crypto_utils.py    # Core encryption functions
-├── sample.txt         # Sample file for testing
-├── README.md          # This file
-├── .gitignore         # Prevents committing keys/encrypted files
-└── venv/              # Virtual environment (not in git)
+├── gui.py                 # Graphical user interface
+├── encryptor.py           # CLI interface
+├── crypto_utils.py        # Core encryption functions
+├── batch_operations.py    # Batch processing functions
+├── logger.py              # Activity logging system
+├── sample.txt             # Sample file for testing
+├── requirements.txt       # Python dependencies
+├── README.md              # This file
+├── .gitignore             # Prevents committing keys/encrypted files
+└── venv/                  # Virtual environment (not in git)
 ```
 
 ## Security Notes
@@ -137,17 +182,33 @@ file-encryptor/
 
 ## Testing
 
-Test the encryption system:
+**Test the GUI:**
+```powershell
+python gui.py
+```
 
+**Test the CLI encryption system:**
 ```powershell
 python crypto_utils.py
 ```
 
-This runs automated tests showing:
+**Test batch operations:**
+```powershell
+python batch_operations.py
+```
+
+**Test logging system:**
+```powershell
+python logger.py
+```
+
+These automated tests show:
 - Key generation
 - File encryption
 - File decryption
 - Content verification
+- Batch processing
+- Activity logging
 
 ## Troubleshooting
 
@@ -164,14 +225,14 @@ This runs automated tests showing:
 
 ## Future Extensions
 
-Planned features to enhance this project:
+Potential enhancements:
 
-- [ ] **Password-based encryption** - Derive keys from user passwords
-- [ ] **Logging system** - Track encryption/decryption operations
-- [ ] **GUI interface** - Tkinter or web-based UI
-- [ ] **Cloud integration** - Encrypt before uploading to cloud storage
-- [ ] **Batch operations** - Encrypt/decrypt multiple files at once
+- [ ] **File compression** - Compress before encrypting to save space
+- [ ] **Cloud integration** - Direct upload to cloud storage
 - [ ] **Key rotation** - Re-encrypt files with new keys
+- [ ] **Secure file deletion** - Overwrite original files securely
+- [ ] **Multi-language support** - Internationalization
+- [ ] **Mobile app** - iOS/Android version
 
 ## Contributing
 
@@ -187,4 +248,7 @@ Built as a portfolio project to demonstrate:
 - Python programming
 - Cryptography concepts
 - CLI development
+- GUI development with Tkinter
+- Batch processing
+- Logging and error handling
 - Security best practices
