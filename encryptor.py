@@ -13,6 +13,11 @@ from crypto_utils import (
     encrypt_file_with_password, decrypt_file_with_password
 )
 from logger import get_log_summary
+from batch_operations import (
+    batch_encrypt_with_key, batch_decrypt_with_key,
+    batch_encrypt_with_password, batch_decrypt_with_password,
+    print_batch_summary
+)
 
 
 def main():
@@ -32,6 +37,12 @@ Examples:
   
   # Use a custom key file
   python encryptor.py encrypt myfile.txt --key custom.key
+  
+  # Batch encrypt multiple files
+  python encryptor.py batch-encrypt "*.txt"
+  
+  # Batch decrypt multiple files
+  python encryptor.py batch-decrypt "*.enc"
   
   # View activity logs
   python encryptor.py logs
@@ -78,6 +89,34 @@ Examples:
     
     # Logs command
     logs_parser = subparsers.add_parser("logs", help="View encryption activity logs")
+    
+    # Batch encrypt command
+    batch_encrypt_parser = subparsers.add_parser("batch-encrypt", help="Encrypt multiple files")
+    batch_encrypt_parser.add_argument("pattern", help="File pattern (e.g., '*.txt', 'docs/*.pdf')")
+    batch_encrypt_parser.add_argument(
+        "--key", "-k",
+        default="secret.key",
+        help="Key file to use (default: secret.key)"
+    )
+    batch_encrypt_parser.add_argument(
+        "--password", "-p",
+        action="store_true",
+        help="Use password-based encryption instead of key file"
+    )
+    
+    # Batch decrypt command
+    batch_decrypt_parser = subparsers.add_parser("batch-decrypt", help="Decrypt multiple files")
+    batch_decrypt_parser.add_argument("pattern", help="File pattern (e.g., '*.enc')")
+    batch_decrypt_parser.add_argument(
+        "--key", "-k",
+        default="secret.key",
+        help="Key file to use (default: secret.key)"
+    )
+    batch_decrypt_parser.add_argument(
+        "--password", "-p",
+        action="store_true",
+        help="Use password-based decryption instead of key file"
+    )
     
     args = parser.parse_args()
     
@@ -187,6 +226,57 @@ Examples:
             print(f"   View with: type logs\\encryption.log")
         
         print("=" * 60)
+    
+    elif args.command == "batch-encrypt":
+        print("=" * 60)
+        print("BATCH ENCRYPTION")
+        print("=" * 60)
+        
+        # Password-based encryption
+        if args.password:
+            password = getpass.getpass("Enter password: ")
+            password_confirm = getpass.getpass("Confirm password: ")
+            
+            if password != password_confirm:
+                print("✗ Error: Passwords don't match")
+                sys.exit(1)
+            
+            if len(password) < 8:
+                print("✗ Error: Password must be at least 8 characters")
+                sys.exit(1)
+            
+            results = batch_encrypt_with_password(args.pattern, password)
+            print_batch_summary(results)
+        
+        # Key-based encryption
+        else:
+            if not os.path.exists(args.key):
+                print(f"✗ Error: Key file '{args.key}' not found")
+                print(f"   Generate a key first: python encryptor.py generate-key")
+                sys.exit(1)
+            
+            results = batch_encrypt_with_key(args.pattern, args.key)
+            print_batch_summary(results)
+    
+    elif args.command == "batch-decrypt":
+        print("=" * 60)
+        print("BATCH DECRYPTION")
+        print("=" * 60)
+        
+        # Password-based decryption
+        if args.password:
+            password = getpass.getpass("Enter password: ")
+            results = batch_decrypt_with_password(args.pattern, password)
+            print_batch_summary(results)
+        
+        # Key-based decryption
+        else:
+            if not os.path.exists(args.key):
+                print(f"✗ Error: Key file '{args.key}' not found")
+                sys.exit(1)
+            
+            results = batch_decrypt_with_key(args.pattern, args.key)
+            print_batch_summary(results)
     
     else:
         parser.print_help()
