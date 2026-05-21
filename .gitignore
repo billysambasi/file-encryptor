@@ -8,11 +8,15 @@ __pycache__/
 *$py.class
 *.so
 
-# Encryption keys - NEVER commit these!
+# Encryption keys
 *.key
 
 # Encrypted files
 *.enc
+
+# Logs
+logs/
+*.log
 
 # IDE
 .vscode/

@@ -12,6 +12,7 @@ from crypto_utils import (
     generate_key, save_key, load_key, encrypt_file, decrypt_file,
     encrypt_file_with_password, decrypt_file_with_password
 )
+from logger import get_log_summary
 
 
 def main():
@@ -31,6 +32,9 @@ Examples:
   
   # Use a custom key file
   python encryptor.py encrypt myfile.txt --key custom.key
+  
+  # View activity logs
+  python encryptor.py logs
         """
     )
     
@@ -71,6 +75,9 @@ Examples:
         action="store_true",
         help="Use password-based decryption instead of key file"
     )
+    
+    # Logs command
+    logs_parser = subparsers.add_parser("logs", help="View encryption activity logs")
     
     args = parser.parse_args()
     
@@ -158,6 +165,28 @@ Examples:
             else:
                 print(f"\n✗ Decryption failed. Wrong key?")
                 sys.exit(1)
+    
+    elif args.command == "logs":
+        print("=" * 60)
+        print("ENCRYPTION ACTIVITY LOGS")
+        print("=" * 60)
+        
+        summary = get_log_summary()
+        
+        if summary["total_entries"] == 0:
+            print("\nNo activity logged yet.")
+            print("Logs will appear here after you encrypt or decrypt files.")
+        else:
+            print(f"\n📊 Summary:")
+            print(f"   Total operations: {summary['total_entries']}")
+            print(f"   ✓ Encryptions: {summary['encryptions']}")
+            print(f"   ✓ Decryptions: {summary['decryptions']}")
+            print(f"   ✗ Errors: {summary['errors']}")
+            
+            print(f"\n📁 Full log file: logs/encryption.log")
+            print(f"   View with: type logs\\encryption.log")
+        
+        print("=" * 60)
     
     else:
         parser.print_help()

@@ -8,6 +8,10 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import os
 import base64
+from logger import setup_logger, log_encryption, log_decryption, log_key_generation, log_error
+
+# Initialize logger
+logger = setup_logger()
 
 
 def generate_key():
@@ -32,6 +36,7 @@ def save_key(key, filename="secret.key"):
     with open(filename, "wb") as key_file:
         key_file.write(key)
     print(f"✓ Key saved to {filename}")
+    log_key_generation(logger, filename)
 
 
 def load_key(filename="secret.key"):
@@ -60,23 +65,28 @@ def encrypt_file(filename, key):
     Returns:
         str: Path to the encrypted file (original_name.enc)
     """
-    # Create a Fernet cipher object with the key
-    fernet = Fernet(key)
-    
-    # Read the original file
-    with open(filename, "rb") as file:
-        file_data = file.read()
-    
-    # Encrypt the data
-    encrypted_data = fernet.encrypt(file_data)
-    
-    # Write the encrypted data to a new file
-    encrypted_filename = filename + ".enc"
-    with open(encrypted_filename, "wb") as file:
-        file.write(encrypted_data)
-    
-    print(f"✓ File encrypted: {encrypted_filename}")
-    return encrypted_filename
+    try:
+        # Create a Fernet cipher object with the key
+        fernet = Fernet(key)
+        
+        # Read the original file
+        with open(filename, "rb") as file:
+            file_data = file.read()
+        
+        # Encrypt the data
+        encrypted_data = fernet.encrypt(file_data)
+        
+        # Write the encrypted data to a new file
+        encrypted_filename = filename + ".enc"
+        with open(encrypted_filename, "wb") as file:
+            file.write(encrypted_data)
+        
+        print(f"✓ File encrypted: {encrypted_filename}")
+        log_encryption(logger, filename, method="key", success=True)
+        return encrypted_filename
+    except Exception as e:
+        log_error(logger, "File encryption", str(e))
+        raise
 
 
 def decrypt_file(filename, key):
@@ -103,6 +113,7 @@ def decrypt_file(filename, key):
     except Exception as e:
         print(f"✗ Decryption failed: {e}")
         print("  Make sure you're using the correct key!")
+        log_decryption(logger, filename, method="key", success=False)
         return None
     
     # Write the decrypted data back
@@ -111,6 +122,7 @@ def decrypt_file(filename, key):
         file.write(decrypted_data)
     
     print(f"✓ File decrypted: {decrypted_filename}")
+    log_decryption(logger, filename, method="key", success=True)
     return decrypted_filename
 
 
@@ -157,28 +169,33 @@ def encrypt_file_with_password(filename, password):
     Returns:
         str: Path to the encrypted file (original_name.enc)
     """
-    # Derive key from password
-    key, salt = derive_key_from_password(password)
-    
-    # Create Fernet cipher
-    fernet = Fernet(key)
-    
-    # Read the original file
-    with open(filename, "rb") as file:
-        file_data = file.read()
-    
-    # Encrypt the data
-    encrypted_data = fernet.encrypt(file_data)
-    
-    # Write salt + encrypted data to file
-    # Format: [16 bytes salt][encrypted data]
-    encrypted_filename = filename + ".enc"
-    with open(encrypted_filename, "wb") as file:
-        file.write(salt)  # Write salt first
-        file.write(encrypted_data)  # Then encrypted data
-    
-    print(f"✓ File encrypted with password: {encrypted_filename}")
-    return encrypted_filename
+    try:
+        # Derive key from password
+        key, salt = derive_key_from_password(password)
+        
+        # Create Fernet cipher
+        fernet = Fernet(key)
+        
+        # Read the original file
+        with open(filename, "rb") as file:
+            file_data = file.read()
+        
+        # Encrypt the data
+        encrypted_data = fernet.encrypt(file_data)
+        
+        # Write salt + encrypted data to file
+        # Format: [16 bytes salt][encrypted data]
+        encrypted_filename = filename + ".enc"
+        with open(encrypted_filename, "wb") as file:
+            file.write(salt)  # Write salt first
+            file.write(encrypted_data)  # Then encrypted data
+        
+        print(f"✓ File encrypted with password: {encrypted_filename}")
+        log_encryption(logger, filename, method="password", success=True)
+        return encrypted_filename
+    except Exception as e:
+        log_error(logger, "Password-based encryption", str(e))
+        raise
 
 
 def decrypt_file_with_password(filename, password):
@@ -211,6 +228,7 @@ def decrypt_file_with_password(filename, password):
     except Exception as e:
         print(f"✗ Decryption failed: {e}")
         print("  Wrong password or corrupted file!")
+        log_decryption(logger, filename, method="password", success=False)
         return None
     
     # Write the decrypted data back
@@ -219,6 +237,7 @@ def decrypt_file_with_password(filename, password):
         file.write(decrypted_data)
     
     print(f"✓ File decrypted with password: {decrypted_filename}")
+    log_decryption(logger, filename, method="password", success=True)
     return decrypted_filename
 
 
